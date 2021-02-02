@@ -44,6 +44,7 @@ class InteractiveIndoorScene(StaticIndoorScene):
                  load_room_instances=None,
                  seg_map_resolution=0.1,
                  scene_source="IG",
+                 custom=False,
                  ):
         """
         :param scene_id: Scene id
@@ -63,8 +64,11 @@ class InteractiveIndoorScene(StaticIndoorScene):
         :param load_room_types: only load objects in these room types into the scene (a list of str)
         :param load_room_instances: only load objects in these room instances into the scene (a list of str)
         :param seg_map_resolution: room segmentation map resolution
-        :param scene_source: source of scene data; among IG, CUBICASA, THREEDFRONT 
+        :param scene_source: source of scene data; among IG, CUBICASA, THREEDFRONT
+        :param custom: force habitat format loading
         """
+
+        self.custom = custom
 
         super(InteractiveIndoorScene, self).__init__(
             scene_id,
@@ -445,24 +449,31 @@ class InteractiveIndoorScene(StaticIndoorScene):
         x, y = rotate_vector_2d(np.array([x, y]), -yaw)
         position += np.array([x, y, z])
 
-        # if the joint is not floating, we add the joint and a link to the embedded urdf
-        if joint_type != "floating":
-            new_joint = ET.SubElement(added_object.object_tree.getroot(), "joint",
-                                      dict([("name", joint_name), ("type", joint_type)]))
-            ET.SubElement(new_joint, "origin",
-                          dict([("rpy", "{0:f} {1:f} {2:f}".format(
-                              *orientation_rpy)), ("xyz", "{0:f} {1:f} {2:f}".format(
-                                  *position))]))
-            ET.SubElement(new_joint, "parent",
-                          dict([("link", joint_parent)]))
-            ET.SubElement(new_joint, "child",
-                          dict([("link", object_name)]))
-            ET.SubElement(added_object.object_tree.getroot(), "link",
-                          dict([("name", joint_parent)]))  # "world")]))
+        if not self.custom:
+            # if the joint is not floating, we add the joint and a link to the embedded urdf
+            if joint_type != "floating":
+                new_joint = ET.SubElement(added_object.object_tree.getroot(), "joint",
+                                          dict([("name", joint_name), ("type", joint_type)]))
+                ET.SubElement(new_joint, "origin",
+                              dict([("rpy", "{0:f} {1:f} {2:f}".format(
+                                  *orientation_rpy)), ("xyz", "{0:f} {1:f} {2:f}".format(
+                                      *position))]))
+                ET.SubElement(new_joint, "parent",
+                              dict([("link", joint_parent)]))
+                ET.SubElement(new_joint, "child",
+                              dict([("link", object_name)]))
+                ET.SubElement(added_object.object_tree.getroot(), "link",
+                              dict([("name", joint_parent)]))  # "world")]))
 
-        # if the joint is floating, we save the transformation of the floating joint to be used when we load the
-        # embedded urdf
+            # if the joint is floating, we save the transformation of the floating joint to be used when we load the
+            # embedded urdf
+            else:
+                joint_frame = get_transform_from_xyz_rpy(position, orientation_rpy)
         else:
+            if joint_type != "floating":
+                added_object.my_is_fixed = True
+            else:
+                added_object.my_is_fixed = False
             joint_frame = get_transform_from_xyz_rpy(position, orientation_rpy)
 
         # Save the transformation internally to be used when loading
