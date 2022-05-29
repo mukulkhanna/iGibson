@@ -584,6 +584,7 @@ class InteractiveIndoorScene(StaticIndoorScene):
     def check_collision(self, body_a, body_b=None, link_a=None, fixed_body_ids=None):
         """
         Helper function to check for collision for scene quality
+        UPDATED: Returns number of collisions
         """
         if body_b is None:
             assert link_a is not None
@@ -646,7 +647,7 @@ class InteractiveIndoorScene(StaticIndoorScene):
         p.stepSimulation()
         for body_a, body_b in overlapped_body_ids:
             n_collisions = self.check_collision(
-                body_a=body_a, body_b=body_b, include_major_collisions_only=True
+                body_a=body_a, body_b=body_b
             )
 
             if generous:
