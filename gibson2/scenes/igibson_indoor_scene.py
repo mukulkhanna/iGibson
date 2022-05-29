@@ -880,7 +880,7 @@ class InteractiveIndoorScene(StaticIndoorScene):
         """
         return self.open_all_objs_by_category("door", mode="max")
 
-    def load(self):
+    def load(self, generous_quality_check=False):
         """
         Load all scene objects into pybullet
         """
@@ -920,7 +920,7 @@ class InteractiveIndoorScene(StaticIndoorScene):
             self.load_trav_map(maps_path)
 
         self.visual_mesh_to_material = visual_mesh_to_material
-        scene_quality = self.check_scene_quality(body_ids, fixed_body_ids)
+        scene_quality = self.check_scene_quality(body_ids, fixed_body_ids, generous_quality_check)
 
         # force wake up each body once
         self.force_wakeup_scene_objects()

@@ -211,7 +211,7 @@ class Simulator:
         return new_object_pb_ids
 
     @load_without_pybullet_vis
-    def import_ig_scene(self, scene):
+    def import_ig_scene(self, scene, generous_quality_check=False):
         """
         Import scene from iGSDF class
 
@@ -221,7 +221,7 @@ class Simulator:
         assert isinstance(
             scene, InteractiveIndoorScene
         ), "import_ig_scene can only be called with InteractiveIndoorScene"
-        new_object_ids, scene_quality = scene.load()
+        new_object_ids, scene_quality = scene.load(generous_quality_check)
         self.objects += new_object_ids
         if scene.texture_randomization:
             # use randomized texture
