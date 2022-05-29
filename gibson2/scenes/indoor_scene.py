@@ -73,7 +73,7 @@ class IndoorScene(Scene):
             if self.trav_map_type == 'with_obj':
                 trav_map = np.array(Image.open(
                     os.path.join(maps_path, 'floor_trav_{}.png'.format(floor))
-                )).convert('L')
+                ).convert('L'))
                 obstacle_map = np.array(Image.open(
                     os.path.join(maps_path, 'floor_{}.png'.format(floor))
                 ))
